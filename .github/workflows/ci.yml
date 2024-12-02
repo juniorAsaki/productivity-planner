@@ -1,0 +1,50 @@
+name: webapp CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.20.5]
+
+    steps:
+      #verification du depot
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      #configuration de node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      #installation des dependences avec npm clean-install
+      - name: Install dependencies
+        run: npm clean-install
+
+      #audit de securité
+      - name: Audit
+        run: npm audit
+
+      #veridication de la signature des audits
+      - name: Audit Signature
+        run: npm audit signature
+
+      #Linter
+      - name: Lint
+        run: npm run lint
+
+      #tests
+      - name: Test
+        run: npm run test:ci
+
+      #Build
+      - name: Build
+        run: npm run build
+
